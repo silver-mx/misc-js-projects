@@ -1,26 +1,9 @@
+#! /usr/bin/env node
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.doSomeStuff = void 0;
-console.log("Try npm run lint/fix!");
-const longString = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer ut aliquet diam.';
-const trailing = 'Semicolon';
-const why = { am: 'I tabbed?' };
-const iWish = "I didn't have a trailing space...";
-const sicilian = true;
-;
-const vizzini = (!!sicilian) ? !!!sicilian : sicilian;
-const re = /foo   bar/;
-function doSomeStuff(withThis, andThat, andThose) {
-    //function on one line
-    if (!Boolean(andThose.length)) {
-        return false;
-    }
-    console.log(withThis);
-    console.log(andThat);
-    console.dir(andThose);
-    console.log(longString, trailing, why, iWish, vizzini, re);
-    return;
-}
-exports.doSomeStuff = doSomeStuff;
-// TODO: more examples
+const chalk_1 = __importDefault(require("chalk"));
+console.log(chalk_1.default.bgGreen('Hello!!!'));
 //# sourceMappingURL=index.js.map
