@@ -5,8 +5,8 @@ import inquirer from 'inquirer';
 import gradient from 'gradient-string';
 import chalkAnimation from 'chalk-animation';
 import figlet from 'figlet';
-import {createSpinner} from 'nanospinner';
-import {Level, WordFinder} from './word-finder.js';
+import { createSpinner } from 'nanospinner';
+import { Level, WordFinder } from './word-finder.js';
 
 const sleep = (ms = 1000) => new Promise(callback => setTimeout(callback, ms));
 
@@ -15,9 +15,9 @@ async function welcome() {
   console.log(`\n\n${chalk.bgBlue('HOW TO PLAY')}\n`);
   const rainbowTitle = chalkAnimation.neon(
     chalk.greenBright('Guess the secret word!!!') +
-      ' otherwise you ' +
-      chalk.redBright('lose') +
-      '\n'
+    ' otherwise you ' +
+    chalk.redBright('lose') +
+    '\n'
   );
 
   await sleep();
@@ -40,7 +40,7 @@ async function askChar(
           .split('')
           .map(c => (guessedChars.includes(c) ? `${c} ` : '_ '))
           .reduce((a, b) => a + b)
-          .trim() + `[${wordLength} chars, ${intents} intents left]`
+        + `[${wordLength} chars, ${intents} intents left]`
       );
     },
   });
@@ -54,7 +54,7 @@ async function playAgain(): Promise<boolean> {
     type: 'input',
     message: 'Do you want to play again?',
     default() {
-      'y/n';
+      return 'y/n';
     },
   });
 
@@ -76,15 +76,25 @@ async function showResult(intents: number, wordToGuess: string) {
   if (intents === 0) {
     msg = chalkAnimation.neon(
       '\n' +
-        chalk.bgRedBright('You lOST!!!') +
-        chalk.bgYellowBright(' ===> ') +
-        chalk.bgGreenBright(`Word: ${wordToGuess}`) +
-        '\n'
+      chalk.bgRedBright('You lOST!!!') +
+      chalk.bgYellowBright(' ===> ') +
+      chalk.bgGreenBright(`Word: ${wordToGuess}`) +
+      '\n'
     );
   }
 
   await sleep();
   msg.stop();
+}
+
+function getInitialGuessedChars(level: Level, wordToGuess: string): Array<string> {
+  if (level === Level.EASY) {
+    return (wordToGuess.length <= 5 ? ['', ''] : ['', '', ''])
+      .map(() => Math.floor(Math.random() * (wordToGuess.length - 1)))
+      .map(randomVal => wordToGuess.at(randomVal)!);
+  }
+
+  return [];
 }
 
 const level = process.env.LEVEL === '1' ? Level.HARD : Level.EASY;
@@ -94,7 +104,7 @@ let again = false;
 do {
   await welcome();
   const wordToGuess = wordFinder.findRandomWord();
-  const guessedChars: Array<string> = [];
+  const guessedChars: Array<string> = getInitialGuessedChars(level, wordToGuess);
   let intents = wordToGuess.length * 2;
 
   while (!isGuessComplete(wordToGuess, guessedChars) && --intents) {

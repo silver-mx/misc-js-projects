@@ -27,7 +27,7 @@ export class WordFinder {
     let randomWord;
 
     do {
-      const randomNum = Math.floor(Math.random() * this._words.length);
+      const randomNum = Math.floor(Math.random() * (this._words.length - 1));
       randomWord = this._words.at(randomNum)?.toLowerCase();
     } while (!this.isValidWord(randomWord));
 
