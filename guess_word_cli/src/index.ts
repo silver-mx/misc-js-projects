@@ -5,64 +5,86 @@ import inquirer from 'inquirer';
 import gradient from 'gradient-string';
 import chalkAnimation from 'chalk-animation';
 import figlet from 'figlet';
-import { createSpinner } from 'nanospinner';
-import { Level, WordFinder } from './word-finder.js';
-
+import {createSpinner} from 'nanospinner';
+import {Level, WordFinder} from './word-finder.js';
 
 const sleep = (ms = 1000) => new Promise(callback => setTimeout(callback, ms));
 
 async function welcome() {
-    console.clear();
-    console.log(`\n\n${chalk.bgBlue('HOW TO PLAY')}\n`);
-    const rainbowTitle = chalkAnimation.neon(chalk.greenBright('Guess the secret word!!!') + ' otherwise you ' + chalk.redBright('lose') + '\n');
+  console.clear();
+  console.log(`\n\n${chalk.bgBlue('HOW TO PLAY')}\n`);
+  const rainbowTitle = chalkAnimation.neon(
+    chalk.greenBright('Guess the secret word!!!') +
+      ' otherwise you ' +
+      chalk.redBright('lose') +
+      '\n'
+  );
 
-    await sleep();
-    rainbowTitle.stop();
+  await sleep();
+  rainbowTitle.stop();
 }
 
-async function askChar(wordToGuess: string, guessedChars: Array<string>, intents: number): Promise<string> {
-    const answer = await inquirer.prompt({
-        name: 'char',
-        type: 'input',
-        message: 'Guess a character in the word',
-        default() {
-            const wordLength = wordToGuess.length;
-            return wordToGuess.split('')
-                .map((c) => guessedChars.includes(c) ? `${c} ` : `_ `)
-                .reduce((a, b) => a + b).trim() + `[${wordLength} chars, ${intents} intents left]`;
-        }
-    });
+async function askChar(
+  wordToGuess: string,
+  guessedChars: Array<string>,
+  intents: number
+): Promise<string> {
+  const answer = await inquirer.prompt({
+    name: 'char',
+    type: 'input',
+    message: 'Guess a character in the word',
+    default() {
+      const wordLength = wordToGuess.length;
+      return (
+        wordToGuess
+          .split('')
+          .map(c => (guessedChars.includes(c) ? `${c} ` : '_ '))
+          .reduce((a, b) => a + b)
+          .trim() + `[${wordLength} chars, ${intents} intents left]`
+      );
+    },
+  });
 
-    return answer.char;
+  return answer.char;
 }
 
 async function playAgain(): Promise<boolean> {
-    const answer = await inquirer.prompt({
-        name: 'playAgain',
-        type: 'input',
-        message: 'Do you want to play again?',
-        default() {
-            'y/n';
-        }
-    });
+  const answer = await inquirer.prompt({
+    name: 'playAgain',
+    type: 'input',
+    message: 'Do you want to play again?',
+    default() {
+      'y/n';
+    },
+  });
 
-    return ['y', 'Y'].includes(answer.playAgain);
+  return ['y', 'Y'].includes(answer.playAgain);
 }
 
 function isGuessComplete(wordToGuess: string, guessedChars: string[]): boolean {
-    const charSet = new Set(wordToGuess.split(''));
-    return Array.from(charSet).filter(c => !guessedChars.includes(c)).length === 0;
+  const charSet = new Set(wordToGuess.split(''));
+  return (
+    Array.from(charSet).filter(c => !guessedChars.includes(c)).length === 0
+  );
 }
 
 async function showResult(intents: number, wordToGuess: string) {
-    let msg = chalkAnimation.neon('\n' + chalk.bgGreenBright('You WON!!!') + '\n');
+  let msg = chalkAnimation.neon(
+    '\n' + chalk.bgGreenBright('You WON!!!') + '\n'
+  );
 
-    if (intents === 0) {
-        msg = chalkAnimation.neon('\n' + chalk.bgRedBright(`You lOST!!!`) + chalk.bgYellowBright(' ===> ') +  chalk.bgGreenBright(`Word: ${wordToGuess}`) + '\n');
-    }
+  if (intents === 0) {
+    msg = chalkAnimation.neon(
+      '\n' +
+        chalk.bgRedBright('You lOST!!!') +
+        chalk.bgYellowBright(' ===> ') +
+        chalk.bgGreenBright(`Word: ${wordToGuess}`) +
+        '\n'
+    );
+  }
 
-    await sleep();
-    msg.stop();
+  await sleep();
+  msg.stop();
 }
 
 const level = process.env.LEVEL === '1' ? Level.HARD : Level.EASY;
@@ -70,23 +92,16 @@ const wordFinder = new WordFinder(level);
 let again = false;
 
 do {
-    await welcome();
-    const wordToGuess = wordFinder.findRandomWord();
-    const guessedChars: Array<string> = [];
-    let intents = wordToGuess.length * 2;
+  await welcome();
+  const wordToGuess = wordFinder.findRandomWord();
+  const guessedChars: Array<string> = [];
+  let intents = wordToGuess.length * 2;
 
-    while (!isGuessComplete(wordToGuess, guessedChars) && --intents) {
-        const chars = await askChar(wordToGuess, guessedChars, intents);
-        chars.split('').forEach(c => guessedChars.push(c));
-    }
+  while (!isGuessComplete(wordToGuess, guessedChars) && --intents) {
+    const chars = await askChar(wordToGuess, guessedChars, intents);
+    chars.split('').forEach(c => guessedChars.push(c));
+  }
 
-    await showResult(intents, wordToGuess);
-    again = await playAgain();
+  await showResult(intents, wordToGuess);
+  again = await playAgain();
 } while (again);
-
-
-
-
-
-
-
