@@ -5,13 +5,23 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+export enum Level {
+    EASY,
+    HARD
+}
 
 export class WordFinder {
 
     private _words: Array<string>;
 
-    constructor() {
-        this._words = this.loadFile();
+    constructor(level = Level.EASY) {
+        let jsonPath = path.join(__dirname, '..', 'svenska-ord-easy.json');
+
+        if (level === Level.HARD) {
+            jsonPath = path.join(__dirname, '..', 'svenska-ord.json');
+        }
+
+        this._words = this.loadFile(jsonPath);
     }
 
 
@@ -20,17 +30,16 @@ export class WordFinder {
 
         do {
             const randomNum = Math.floor(Math.random() * this._words.length);
-            randomWord = this._words.at(randomNum);
+            randomWord = this._words.at(randomNum)?.toLowerCase();
         } while (!this.isValidWord(randomWord));
 
         return randomWord!;
     }
 
-    private loadFile() {
-        const jsonPath = path.join(__dirname, '..', 'svenska-ord.json');
-        console.log(`Loading words file from [${jsonPath}]`);
+    private loadFile(path: string) {
+        console.log(`Loading words file from [${path}]`);
 
-        const data = fs.readFileSync(jsonPath, 'utf-8');
+        const data = fs.readFileSync(path, 'utf-8');
         const jsonData = JSON.parse(data);
         console.log(`Loaded [${jsonData.length}] words.....`);
 

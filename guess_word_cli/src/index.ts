@@ -6,7 +6,7 @@ import gradient from 'gradient-string';
 import chalkAnimation from 'chalk-animation';
 import figlet from 'figlet';
 import { createSpinner } from 'nanospinner';
-import { WordFinder } from './word-finder.js';
+import { Level, WordFinder } from './word-finder.js';
 
 
 const sleep = (ms = 1000) => new Promise(callback => setTimeout(callback, ms));
@@ -65,7 +65,8 @@ async function showResult(intents: number, wordToGuess: string) {
     msg.stop();
 }
 
-const wordFinder = new WordFinder();
+const level = process.env.LEVEL === '1' ? Level.HARD : Level.EASY;
+const wordFinder = new WordFinder(level);
 let again = false;
 
 do {
