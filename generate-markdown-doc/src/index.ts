@@ -10,13 +10,13 @@ const repoBasename = path.basename(targetRepo);
 const clonedRepoTmpDir = `${os.tmpdir()}/${repoBasename}`;
 
 // Be sure the repository does not exist
-fs.rmSync(clonedRepoTmpDir, {recursive: true, force: true});
+fs.rmSync(clonedRepoTmpDir, { recursive: true, force: true });
 
 console.log(`Target repository: ${targetRepo}`);
 
 execSync(`git clone ${targetRepo} ${clonedRepoTmpDir}`);
 
-const fileLst = fs.readdirSync(clonedRepoTmpDir, {recursive: true});
+const fileLst = fs.readdirSync(clonedRepoTmpDir, { recursive: true });
 const questionFiles = fileLst
   .filter(f => {
     const filename = path.basename(f.toString());
@@ -34,7 +34,7 @@ questionFiles.forEach(filePath => {
 
   console.log(`Processing file: ${absolutePath}`);
 
-  if (filename.includes('-Explanation')) {
+  if (filename.includes('-Exp')) {
     const answerNum = filename.split('-')[0];
     const answer = fs.readFileSync(absolutePath, 'utf-8');
     const answerLst =
@@ -45,7 +45,7 @@ questionFiles.forEach(filePath => {
     const question = fs.readFileSync(absolutePath, 'utf-8');
     const questionLst =
       questionMap.get(title) ?? questionMap.set(title, []).get(title);
-    questionLst!.push(`**${questionNum}.** ${question}\n\n`);
+    questionLst!.push(`**${questionNum}.** ${question}\n`);
   }
 });
 
@@ -54,29 +54,35 @@ const markdownOutputDir = './markdownOutput';
 if (!fs.existsSync(markdownOutputDir)) {
   fs.mkdirSync(markdownOutputDir);
 }
-createMarkdownFile(
+
+createMarkdownFile(targetRepo,
   markdownOutputDir,
   `${repoBasename}-questions.md`,
   questionMap
 );
-createMarkdownFile(markdownOutputDir, `${repoBasename}-answers.md`, answerMap);
+
+createMarkdownFile(targetRepo, markdownOutputDir, `${repoBasename}-answers.md`, answerMap);
 
 // Clean up the folder
-fs.rmSync(clonedRepoTmpDir, {recursive: true, force: true});
+fs.rmSync(clonedRepoTmpDir, { recursive: true, force: true });
 
 function createMarkdownFile(
+  targetRepo: string,
   dir: string,
   filename: string,
   dataMap: Map<string, string[]>
-): void {
-  fs.rmSync(filename, {force: true});
+): string {
+  fs.rmSync(filename, { force: true });
 
-  const output = fs.createWriteStream(path.join(dir, filename));
+  const markdownPath = path.join(dir, filename);
+  const output = fs.createWriteStream(markdownPath);
   output.write(
     filename.includes('questions')
-      ? `#QUESTIONS - ${filename}\n`
-      : `#ANSWERS - ${filename}\n`
+      ? `\n# QUESTIONS - ${filename}\n\n`
+      : `\n# ANSWERS - ${filename}\n\n`
   );
+
+  output.write(`Source: [${targetRepo}](${targetRepo})\n`);
 
   dataMap.forEach((valueLst, title) => {
     output.write(title);
@@ -86,13 +92,17 @@ function createMarkdownFile(
   console.log(`The file: ${filename} has been created...`);
 
   output.end();
+
+  return markdownPath;
 }
 
 function buildTitle(filePath: string, filename: string): string {
   const lst = filePath.replace(filename, '').split('/');
   let markdownLevel = 2;
-  let title = '';
-  lst.forEach(value => (title += '#'.repeat(markdownLevel++) + value + '\n'));
+  let title = '\n';
+  lst
+    .filter(value => !!value.trim())
+    .forEach(value => (title += '#'.repeat(markdownLevel++) + ' ' + value + '\n\n'));
 
   return title;
 }
