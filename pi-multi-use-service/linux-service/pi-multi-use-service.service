@@ -1,0 +1,18 @@
+
+[Unit]
+Description=pi-multi-use-service
+Documentation=https://example.com
+After=network.target
+
+[Service]
+Environment=NODE_PORT=3334
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/wa/misc-js-projects/pi-multi-use-service
+ExecStart=npm start
+Restart=on-failure
+StandardOutput=append:/tmp/pi-multi-use-service.log
+StandardError=append:/tmp/pi-multi-use-service.log
+
+[Install]
+WantedBy=multi-user.target
